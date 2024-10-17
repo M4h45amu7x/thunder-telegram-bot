@@ -7,7 +7,7 @@
     "prettier:write": "prettier --write ./src --plugin=prettier-plugin-organize-imports && prettier --write ./src --plugin=@trivago/prettier-plugin-sort-imports"
   },
   "dependencies": {
-    "@prisma/client": "^5.21.0",
+    "@prisma/client": "5.20.0",
     "dayjs": "^1.11.13",
     "jsqr": "^1.4.0",
     "node-telegram-bot-api": "^0.66.0",
@@ -20,7 +20,7 @@
     "@types/node-telegram-bot-api": "^0.64.7",
     "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "prisma": "^5.21.0"
+    "prisma": "5.20.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
