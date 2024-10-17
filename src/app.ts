@@ -8,10 +8,6 @@ const bot = new TelegramBot(process.env.BOT_TOKEN, {
     polling: true,
 })
 
-bot.on('chat_join_request', event => {
-    bot.sendMessage(event.chat.id, 'test')
-})
-
 bot.on('message', async event => {
     try {
         if (event.photo?.length === 2) {
@@ -66,6 +62,17 @@ bot.on('message', async event => {
 })
 
 bot.onText(new RegExp('/chatid@thunder_slip_notify_bot'), event => {
+    if (event.chat.type !== 'group' && event.chat.type !== 'supergroup') return
+
+    bot.sendPhoto(event.chat.id, 'https://placehold.co/1920x1080.jpg', {
+        parse_mode: 'MarkdownV2',
+        caption: `✅ Chat Id ของคุณคือ **\`${event.chat.id}\`**`,
+    })
+})
+
+bot.onText(new RegExp('/chatid'), event => {
+    if (event.chat.type !== 'private') return
+
     bot.sendPhoto(event.chat.id, 'https://placehold.co/1920x1080.jpg', {
         parse_mode: 'MarkdownV2',
         caption: `✅ Chat Id ของคุณคือ **\`${event.chat.id}\`**`,
