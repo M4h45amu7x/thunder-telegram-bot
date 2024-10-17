@@ -1,0 +1,537 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model account {
+  id                                                                    Int                       @id @default(autoincrement())
+  role                                                                  String                    @default("member") @db.VarChar
+  email                                                                 String                    @db.VarChar
+  password                                                              String                    @db.VarChar
+  username                                                              String                    @db.VarChar
+  from_ref                                                              String?                   @db.VarChar
+  first_name                                                            String?                   @db.VarChar
+  last_name                                                             String?                   @db.VarChar
+  bank_id                                                               String?
+  bank_account                                                          String?
+  phone                                                                 String?                   @db.VarChar
+  phone_confirmed                                                       Boolean                   @default(false)
+  has_trial                                                             Boolean                   @default(false)
+  is_confirmed                                                          Boolean                   @default(false)
+  contact                                                               String?                   @db.VarChar
+  way_to_know                                                           String?                   @db.VarChar
+  balance                                                               Float                     @default(0)
+  bonus                                                                 Float                     @default(0)
+  aff_percent                                                           Float                     @default(0)
+  last_login_at                                                         DateTime?                 @db.Timestamptz(6)
+  deleted_at                                                            DateTime?                 @db.Timestamptz(6)
+  updated_at                                                            DateTime                  @default(now()) @db.Timestamptz(6)
+  created_at                                                            DateTime                  @default(now()) @db.Timestamptz(6)
+  ref                                                                   Int?
+  ip_address                                                            String?                   @db.VarChar
+  last_sign_in_ip_address                                               String?                   @db.VarChar
+  last_sign_up_ip_address                                               String?                   @db.VarChar
+  free_account                                                          Boolean                   @default(false)
+  required_new_password                                                 Boolean                   @default(false)
+  livechat_entity_id                                                    String?                   @db.VarChar
+  livechat_cst                                                          String?                   @db.VarChar
+  internal_username                                                     String?                   @db.VarChar
+  setup_state                                                           String?                   @db.VarChar
+  taxpayer_id                                                           Json?
+  account                                                               account?                  @relation("accountToaccount", fields: [ref], references: [id], onUpdate: NoAction, map: "account_account_child_accounts")
+  other_account                                                         account[]                 @relation("accountToaccount")
+  api_key                                                               api_key[]
+  kyc                                                                   kycs[]                    @relation("account")
+  kyc_action                                                            kycs[]                    @relation("action_by_account")
+  logs                                                                  logs[]
+  product_likes                                                         product_likes[]
+  receipt_logs                                                          receipt_logs[]
+  reference_logs_reference_logs_account_idToaccount                     reference_logs[]          @relation("reference_logs_account_idToaccount")
+  reference_logs_reference_logs_by_account_idToaccount                  reference_logs[]          @relation("reference_logs_by_account_idToaccount")
+  reference_withdraw_logs                                               reference_withdraw_logs[]
+  reference_withdraw_logs_reference_withdraw_logs_action_by_idToaccount reference_withdraw_logs[] @relation("reference_withdraw_logs_action_by_idToaccount")
+  refund_logs_refund_logs_account_idToaccount                           refund_logs[]             @relation("refund_logs_account_idToaccount")
+  refund_logs_refund_logs_by_account_idToaccount                        refund_logs[]             @relation("refund_logs_by_account_idToaccount")
+  service                                                               service[]
+  service_logs                                                          service_logs[]
+  service_logs_service_logs_action_by_idToaccount                       service_logs[]            @relation("service_logs_action_by_idToaccount")
+  session                                                               session[]
+  topup_logs                                                            topup_logs[]
+  topup_logs_topup_logs_add_by_idToaccount                              topup_logs[]              @relation("topup_logs_add_by_idToaccount")
+}
+
+model api_key {
+  id           Int      @id @default(autoincrement())
+  key          String   @unique @db.VarChar
+  ip_whitelist String   @db.VarChar
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime @default(now()) @db.Timestamptz(6)
+  account_id   Int?
+  account      account? @relation(fields: [account_id], references: [id], onUpdate: NoAction, map: "api_key_account_api_keys")
+}
+
+model category {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at DateTime  @default(now()) @db.Timestamptz(6)
+  product    product[]
+}
+
+model configuration {
+  id           Int       @id @default(autoincrement())
+  public       Boolean
+  type         String    @db.VarChar
+  key          String    @unique @db.VarChar
+  value        String    @db.VarChar
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+  display_name String?   @db.VarChar
+}
+
+model line_users {
+  id            BigInt          @id @default(autoincrement())
+  user_id       String?         @unique @db.VarChar
+  display_name  String?         @db.VarChar
+  created_at    DateTime        @db.Timestamptz(6)
+  updated_at    DateTime?       @db.Timestamptz(6)
+  qrcodes_hooks qrcodes_hooks[]
+}
+
+model product {
+  id                    Int                     @id @default(autoincrement())
+  type                  String                  @db.VarChar
+  name                  String                  @db.VarChar
+  features              Json
+  description           String                  @db.VarChar
+  limit                 Int
+  image                 String                  @db.VarChar
+  price                 Float
+  period                Int
+  liked                 Int
+  actived               Boolean
+  default_property      Json
+  affiliate_percent     BigInt                  @default(0)
+  created_at            DateTime                @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime                @default(now()) @db.Timestamptz(6)
+  deleted_at            DateTime?               @db.Timestamptz(6)
+  category_id           Int?
+  discount_monthly_1    Float?                  @default(0)
+  discount_monthly_3    Float?                  @default(0)
+  discount_monthly_6    Float?                  @default(0)
+  discount_yearly       Float?                  @default(0)
+  category              category?               @relation(fields: [category_id], references: [id], onUpdate: NoAction, map: "product_category_products")
+  product_likes         product_likes[]
+  service               service[]
+  service_active_counts service_active_counts[]
+  service_logs          service_logs[]
+}
+
+model qrcodes_hooks {
+  id                     BigInt      @id @default(autoincrement())
+  qrcode                 String?     @unique @db.VarChar
+  reply_token            String?     @db.VarChar
+  retry                  BigInt?     @default(0)
+  created_at             DateTime    @db.Timestamptz(6)
+  updated_at             DateTime?   @db.Timestamptz(6)
+  line_users_qrcodehooks BigInt?
+  service_qrcodehooks    Int?
+  line_users             line_users? @relation(fields: [line_users_qrcodehooks], references: [id], onUpdate: NoAction, map: "qrcodes_hooks_line_users_qrcodehooks")
+  service                service?    @relation(fields: [service_qrcodehooks], references: [id], onUpdate: NoAction, map: "qrcodes_hooks_service_qrcodehooks")
+  slips                  slips[]
+}
+
+model reference_logs {
+  id                                            Int           @id @default(autoincrement())
+  event                                         String?       @db.VarChar
+  status                                        String        @default("pending") @db.VarChar
+  amount                                        Float         @default(0)
+  updated_at                                    DateTime      @default(now()) @db.Timestamptz(6)
+  created_at                                    DateTime      @default(now()) @db.Timestamptz(6)
+  account_id                                    Int?
+  by_account_id                                 Int?
+  service_id                                    Int?
+  ip_address                                    String?       @db.VarChar
+  is_auto                                       Boolean?
+  account_reference_logs_account_idToaccount    account?      @relation("reference_logs_account_idToaccount", fields: [account_id], references: [id], onUpdate: NoAction, map: "reference_logs_account_reference_logs")
+  account_reference_logs_by_account_idToaccount account?      @relation("reference_logs_by_account_idToaccount", fields: [by_account_id], references: [id], onUpdate: NoAction, map: "reference_logs_account_reference_logs_by_account_id")
+  service                                       service?      @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "reference_logs_service_reference_logs")
+  service_logs                                  service_logs?
+}
+
+model reference_withdraw_logs {
+  id                                                    Int      @id @default(autoincrement())
+  bank_id                                               String?  @default("0000000") @db.VarChar
+  bank_number                                           String?  @default("0000000") @db.VarChar
+  bank_name                                             String?  @default("0000000") @db.VarChar
+  type                                                  String   @default("credit") @db.VarChar
+  status                                                String   @default("pending") @db.VarChar
+  reject_message                                        String?  @db.VarChar
+  amount                                                Float    @default(0)
+  updated_at                                            DateTime @default(now()) @db.Timestamptz(6)
+  created_at                                            DateTime @default(now()) @db.Timestamptz(6)
+  action_by_id                                          Int?
+  account_id                                            Int?
+  ip_address                                            String?  @db.VarChar
+  account                                               account? @relation(fields: [account_id], references: [id], onUpdate: NoAction, map: "reference_withdraw_logs_account_reference_withdraw_log")
+  account_reference_withdraw_logs_action_by_idToaccount account? @relation("reference_withdraw_logs_action_by_idToaccount", fields: [action_by_id], references: [id], onUpdate: NoAction, map: "reference_withdraw_logs_account_withdraw_action_by_id")
+}
+
+model service {
+  id                         Int                         @id @default(autoincrement())
+  name                       String?                     @db.VarChar
+  prefix                     String                      @unique @db.VarChar
+  group_name                 String?                     @db.VarChar
+  group_id                   String?                     @db.VarChar
+  type_business              String?                     @db.VarChar
+  type_sub_business          String?                     @db.VarChar
+  slip_count                 BigInt                      @default(0)
+  slip_total                 BigInt                      @default(0)
+  type_branch                String                      @default("master") @db.VarChar
+  type                       String                      @default("webhook") @db.VarChar
+  display_format             String                      @default("text_box") @db.VarChar
+  property                   Json
+  features                   Json?
+  charged                    Float                       @default(0)
+  usage_start                DateTime                    @default(now()) @db.Timestamptz(6)
+  is_stop                    Boolean                     @default(false)
+  webhook                    Boolean                     @default(false)
+  latest_webhook_received_at DateTime?                   @db.Timestamptz(6)
+  status                     String                      @default("active") @db.VarChar
+  expired_at                 DateTime                    @db.Timestamptz(6)
+  auto_renew_limit           Boolean                     @default(true)
+  auto_renew_expired         Boolean                     @default(true)
+  created_at                 DateTime                    @default(now()) @db.Timestamptz(6)
+  updated_at                 DateTime                    @default(now()) @db.Timestamptz(6)
+  deleted_at                 DateTime?                   @db.Timestamptz(6)
+  account_id                 Int?
+  product_id                 Int?
+  brache_service             Int?
+  image                      String?                     @db.VarChar
+  billing_type               String                      @default("monthly_1") @db.VarChar
+  slip_limit                 BigInt                      @default(0)
+  line_bot_line_bot_service  BigInt?
+  match_id                   String?                     @unique @db.VarChar
+  internal_name              String?                     @db.VarChar
+  setup_state                String?                     @db.VarChar
+  line_notify_status         Boolean                     @default(false)
+  telegram_notify_status     Boolean                     @default(false)
+  taxpayer_id                String?                     @db.VarChar
+  branch                     String?                     @db.VarChar
+  address                    String?                     @db.VarChar
+  company                    String?                     @db.VarChar
+  email                      String?                     @db.VarChar
+  first_name                 String?                     @db.VarChar
+  last_name                  String?                     @db.VarChar
+  phone                      String?                     @db.VarChar
+  tax_type                   String?                     @db.VarChar
+  export_service_url_tokens  export_service_url_tokens[]
+  export_users               export_users[]
+  match_accounts             match_accounts[]
+  match_slips                match_slips[]
+  qrcodes_hooks              qrcodes_hooks[]
+  reference_logs             reference_logs[]
+  account                    account?                    @relation(fields: [account_id], references: [id], onUpdate: NoAction, map: "service_account_services")
+  line_bots                  line_bots?                  @relation(fields: [line_bot_line_bot_service], references: [id], onUpdate: NoAction, map: "service_line_bots_line_bot_service")
+  product                    product?                    @relation(fields: [product_id], references: [id], onUpdate: NoAction, map: "service_product_services")
+  service                    service?                    @relation("serviceToservice", fields: [brache_service], references: [id], onUpdate: NoAction, map: "service_service_child_service")
+  other_service              service[]                   @relation("serviceToservice")
+  service_chanel_tokens      service_chanel_tokens[]
+  service_logs               service_logs[]
+  service_sms_alert_logs     service_sms_alert_logs[]
+  slips                      slips[]
+}
+
+model session {
+  id         Int      @id @default(autoincrement())
+  payload    String   @unique @db.VarChar
+  ip_address String   @db.VarChar
+  user_agent String   @db.VarChar
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+  account_id Int?
+  account    account? @relation(fields: [account_id], references: [id], onUpdate: NoAction, map: "session_account_sessions")
+}
+
+model slip_temps {
+  id         BigInt    @id @default(autoincrement())
+  data_ocr   String?
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+}
+
+model slips {
+  slip_id            String         @id @db.Uuid
+  qrcode             String?        @unique @db.VarChar
+  key_name           String?
+  amount             Decimal?       @default(0) @db.Decimal
+  data               Json?
+  type               String         @default("deposit") @db.VarChar
+  status             String         @default("notFound") @db.VarChar
+  created_at         DateTime       @db.Timestamptz(6)
+  updated_at         DateTime?      @db.Timestamptz(6)
+  qrcodes_hooks_slip BigInt?
+  service_slip       Int?
+  sending_bank       String?        @db.VarChar
+  api                String?
+  is_edited          Boolean        @default(false)
+  qrcodes_hooks      qrcodes_hooks? @relation(fields: [qrcodes_hooks_slip], references: [id], onUpdate: NoAction, map: "slips_qrcodes_hooks_slip")
+  service            service?       @relation(fields: [service_slip], references: [id], onUpdate: NoAction, map: "slips_service_slip")
+
+  @@index([qrcode], map: "slip_qrcode")
+}
+
+model topup_logs {
+  id                                    Int      @id @default(autoincrement())
+  qrcode                                String   @unique @db.VarChar
+  amount                                Float
+  balance                               Float
+  api                                   Int?
+  receiver                              String?  @db.VarChar
+  from                                  String?  @db.VarChar
+  status                                String   @default("pending") @db.VarChar
+  created_at                            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at                            DateTime @default(now()) @db.Timestamptz(6)
+  account_id                            Int?
+  add_by_id                             Int?
+  account                               account? @relation(fields: [account_id], references: [id], onUpdate: NoAction, map: "topup_logs_account_topup_log")
+  account_topup_logs_add_by_idToaccount account? @relation("topup_logs_add_by_idToaccount", fields: [add_by_id], references: [id], onUpdate: NoAction, map: "topup_logs_account_topup_log_add_by_id")
+}
+
+model expenses {
+  id           Int      @id @default(autoincrement())
+  date         DateTime @db.Timestamptz(6)
+  img          String?
+  backup_payer String?
+  amount       Float    @default(0)
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  update_time  BigInt?  @default(0)
+  updated_at   DateTime @default(now()) @db.Timestamptz(6)
+}
+
+model logs {
+  id         Int      @id @default(autoincrement())
+  message    String?
+  ip_address String?
+  property   Json?
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  account_id Int?
+  account    account? @relation(fields: [account_id], references: [id], onUpdate: NoAction, map: "logs_account_logs")
+}
+
+model service_logs {
+  id                                         Int             @id @default(autoincrement())
+  flowaccount_id                             String?
+  renewal_time                               BigInt          @default(0)
+  is_auto                                    Boolean         @default(false)
+  event                                      String          @default("created_first") @db.VarChar
+  amount                                     Float           @default(0)
+  created_at                                 DateTime        @default(now()) @db.Timestamptz(6)
+  account_id                                 Int?
+  service_id                                 Int?
+  product_id                                 Int?
+  status                                     String          @default("unknown") @db.VarChar
+  reason                                     String?
+  action_by_id                               Int?
+  discount                                   Float           @default(0)
+  billing_type                               String?         @db.VarChar
+  service_data                               Json?
+  reference_logs_service_logs                Int?            @unique
+  tax_withholding                            Boolean         @default(false)
+  refund_logs                                refund_logs[]
+  account                                    account?        @relation(fields: [account_id], references: [id], onUpdate: NoAction, map: "service_logs_account_service_logs")
+  account_service_logs_action_by_idToaccount account?        @relation("service_logs_action_by_idToaccount", fields: [action_by_id], references: [id], onUpdate: NoAction, map: "service_logs_account_service_logs_by_id")
+  product                                    product?        @relation(fields: [product_id], references: [id], onUpdate: NoAction, map: "service_logs_product_service_logs")
+  reference_logs                             reference_logs? @relation(fields: [reference_logs_service_logs], references: [id], onUpdate: NoAction, map: "service_logs_reference_logs_service_logs")
+  service                                    service?        @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "service_logs_service_service_logs")
+}
+
+model service_sms_alert_logs {
+  id         BigInt   @id @default(autoincrement())
+  message    String   @db.VarChar
+  created_at DateTime @db.Timestamptz(6)
+  service_id Int?
+  service    service? @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "service_sms_alert_logs_service_service_sms_alert_Log")
+}
+
+model otp_stores {
+  id              Int       @id @default(autoincrement())
+  phone           String?
+  key             String?
+  value           String?
+  confirmation_at DateTime? @db.Timestamptz(6)
+  type_branch     String    @default("confirm") @db.VarChar
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+}
+
+model kycs {
+  id             Int      @id @default(autoincrement())
+  first_name     String?
+  last_name      String?
+  image          String?
+  bank_id        String?
+  bank_account   String?
+  status         String   @default("pending") @db.VarChar
+  reject_message String?  @db.VarChar
+  updated_at     DateTime @default(now()) @db.Timestamptz(6)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  account_id     Int?
+  action_by_id   Int?
+  account        account? @relation("account", fields: [account_id], references: [id], onUpdate: NoAction, map: "kycs_account_kyc_account_id")
+  action_by      account? @relation("action_by_account", fields: [action_by_id], references: [id], onUpdate: NoAction, map: "kycs_account_kyc_action_by_id")
+}
+
+model export_users {
+  id         BigInt    @id @default(autoincrement())
+  file       String    @unique @db.VarChar
+  type       String    @db.VarChar
+  status     String    @default("pending") @db.VarChar
+  created_at DateTime  @db.Timestamptz(6)
+  expired_at DateTime? @db.Timestamptz(6)
+  service_id Int?
+  channel    String    @default("user") @db.VarChar
+  service    service?  @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "export_users_service_export_users")
+
+  @@index([status], map: "exportusers_status")
+}
+
+model export_service_url_tokens {
+  id         BigInt   @id @default(autoincrement())
+  token      String   @unique @db.VarChar
+  active     Boolean  @default(true)
+  created_at DateTime @db.Timestamptz(6)
+  expired_at DateTime @db.Timestamptz(6)
+  service_id Int?
+  service    service? @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "export_service_url_tokens_service_export_service_url_token")
+}
+
+model service_active_counts {
+  id         BigInt    @id @default(autoincrement())
+  count      BigInt    @default(0)
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  product_id Int?
+  product    product?  @relation(fields: [product_id], references: [id], onUpdate: NoAction, map: "service_active_counts_product_service_active_count")
+}
+
+model service_chanel_tokens {
+  id             BigInt   @id @default(autoincrement())
+  channel_secret String   @db.VarChar
+  created_at     DateTime @db.Timestamptz(6)
+  updated_at     DateTime @db.Timestamptz(6)
+  service_id     Int?
+  service        service? @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "service_chanel_tokens_service_service_chanel_token")
+}
+
+model product_likes {
+  id         BigInt    @id @default(autoincrement())
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+  account_id Int?
+  product_id Int?
+  account    account?  @relation(fields: [account_id], references: [id], onUpdate: NoAction, map: "product_likes_account_product_like")
+  product    product?  @relation(fields: [product_id], references: [id], onUpdate: NoAction, map: "product_likes_product_product_like")
+}
+
+model service_renew_counts {
+  id         BigInt    @id @default(autoincrement())
+  count      BigInt?
+  need_renew BigInt?
+  not_renew  BigInt?
+  created_at DateTime  @db.Timestamptz(6)
+  updated_at DateTime? @db.Timestamptz(6)
+}
+
+model refund_logs {
+  id                                         Int           @id @default(autoincrement())
+  status                                     String        @default("unknown") @db.VarChar
+  reject_message                             String?
+  amount                                     Float
+  created_at                                 DateTime      @default(now()) @db.Timestamptz(6)
+  account_id                                 Int?
+  by_account_id                              Int?
+  reason                                     String?
+  updated_at                                 DateTime      @default(now()) @db.Timestamptz(6)
+  service_logs_refunds_logs                  Int?
+  account_refund_logs_account_idToaccount    account?      @relation("refund_logs_account_idToaccount", fields: [account_id], references: [id], onUpdate: NoAction, map: "refund_logs_account_refunds_logs")
+  account_refund_logs_by_account_idToaccount account?      @relation("refund_logs_by_account_idToaccount", fields: [by_account_id], references: [id], onUpdate: NoAction, map: "refund_logs_account_refundslogs_logs_by_account_id")
+  service_logs                               service_logs? @relation(fields: [service_logs_refunds_logs], references: [id], onUpdate: NoAction, map: "refund_logs_service_logs_refunds_logs")
+}
+
+model line_bots {
+  id             BigInt    @id @default(autoincrement())
+  name           String    @db.VarChar
+  link           String    @db.VarChar
+  channel_id     String?   @db.VarChar
+  channel_secret String?   @db.VarChar
+  channel_token  String?   @db.VarChar
+  note           String?   @db.VarChar
+  types          Int[]
+  prefix         String    @db.VarChar
+  qrcode         String    @db.VarChar
+  created_at     DateTime  @db.Timestamptz(6)
+  updated_at     DateTime  @default(now()) @db.Timestamptz(6)
+  service        service[]
+}
+
+model receipt_logs {
+  id           Int      @id @default(autoincrement())
+  receipt_type String   @default("UNKNOWN") @db.VarChar
+  created_at   DateTime @db.Timestamptz(6)
+  updated_at   DateTime @default(now()) @db.Timestamptz(6)
+  account_id   Int?
+  account      account? @relation(fields: [account_id], references: [id], onUpdate: NoAction, map: "receipt_logs_account_receipt_logs")
+}
+
+model match_accounts {
+  id            BigInt          @id @default(autoincrement())
+  username      String          @db.VarChar
+  password      String          @db.VarChar
+  phone         String          @db.VarChar
+  service_id    Int?
+  deleted_at    DateTime?       @db.Timestamptz(6)
+  updated_at    DateTime        @default(now()) @db.Timestamptz(6)
+  created_at    DateTime        @default(now()) @db.Timestamptz(6)
+  service       service?        @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "match_accounts_service_match_accounts")
+  match_session match_session[]
+  match_slips   match_slips[]
+
+  @@unique([phone, service_id], map: "matchaccount_phone_service_id")
+  @@unique([username, service_id], map: "matchaccount_username_service_id")
+}
+
+model match_slips {
+  id               BigInt          @id @default(autoincrement())
+  payload          String?         @db.VarChar
+  note             String?         @db.VarChar
+  data             Json?
+  amount           Float
+  status           String          @db.VarChar
+  type             String          @db.VarChar
+  deleted_at       DateTime?       @db.Timestamptz(6)
+  updated_at       DateTime        @default(now()) @db.Timestamptz(6)
+  created_at       DateTime        @default(now()) @db.Timestamptz(6)
+  match_account_id BigInt?
+  service_id       Int?
+  receipt_image    String?         @db.VarChar
+  slip_image       String?         @db.VarChar
+  slip_amount      Float
+  match_accounts   match_accounts? @relation(fields: [match_account_id], references: [id], onUpdate: NoAction, map: "match_slips_match_accounts_match_slips")
+  service          service?        @relation(fields: [service_id], references: [id], onUpdate: NoAction, map: "match_slips_service_match_slips")
+}
+
+model match_session {
+  id               Int             @id @default(autoincrement())
+  payload          String          @unique @db.VarChar
+  ip_address       String          @db.VarChar
+  user_agent       String          @db.VarChar
+  created_at       DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at       DateTime        @default(now()) @db.Timestamptz(6)
+  match_account_id BigInt?
+  match_accounts   match_accounts? @relation(fields: [match_account_id], references: [id], onUpdate: NoAction, map: "match_session_match_accounts_match_session")
+}
