@@ -6,13 +6,6 @@ import { cooldown, prisma, utils } from '@/libs'
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, {
     polling: true,
-    request: {
-        url: 'https://api.telegram.org',
-        agentOptions: {
-            keepAlive: true,
-            family: 4,
-        },
-    },
 })
 
 bot.on('chat_join_request', event => {
@@ -70,6 +63,13 @@ bot.on('message', async event => {
     } catch (error) {
         console.error(error)
     }
+})
+
+bot.onText(new RegExp('/chatid@thunder_slip_notify_bot'), event => {
+    bot.sendPhoto(event.chat.id, 'https://placehold.co/1920x1080.jpg', {
+        parse_mode: 'MarkdownV2',
+        caption: `✅ Chat Id ของคุณคือ **\`${event.chat.id}\`**`,
+    })
 })
 
 console.log('Started Thunder Bot')
