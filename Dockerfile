@@ -1,20 +1,20 @@
-# Use the official Bun image
-FROM oven/bun:1.1.30
+# Use the official Node.js image based on Alpine
+FROM node:22.9.0-alpine
 
 # Set the working directory
 WORKDIR /app
 
-# Copy the package.json and bun.lockb files to the working directory
-COPY package.json bun.lockb ./
+# Copy the package.json and yarn.lock files to the working directory
+COPY package.json yarn.lock ./
 
-# Install dependencies using Bun
-RUN bun install
+# Install dependencies using Yarn
+RUN yarn install
 
-# Copy the rest of the application code to the working directory
+# Copy the rest of the dashboard code to the working directory
 COPY . .
 
 # Build the application
-RUN bun run build
+RUN yarn build
 
-# Start the application
-CMD ["bun", "run", "start"]
+# Start the dashboard
+CMD ["yarn", "start"]
