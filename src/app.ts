@@ -54,6 +54,7 @@ bot.on('message', async event => {
                     event.chat.id,
                     `✅ เปิดการใช้งานแจ้งเตือนผ่าน Telegram ของบริการ ${service.name} สำเร็จแล้ว`,
                 )
+                console.log(`Connected ${service.name} success!`)
             }
         }
     } catch (error) {
@@ -61,7 +62,7 @@ bot.on('message', async event => {
     }
 })
 
-bot.onText(new RegExp('/chatid@thunder_slip_notify_bot'), event => {
+bot.onText(/^\/chatid@thunder_slip_notify_bot$/, event => {
     if (event.chat.type !== 'group' && event.chat.type !== 'supergroup') return
 
     bot.sendPhoto(event.chat.id, 'https://placehold.co/1920x1080.jpg', {
@@ -70,13 +71,17 @@ bot.onText(new RegExp('/chatid@thunder_slip_notify_bot'), event => {
     })
 })
 
-bot.onText(new RegExp('/chatid'), event => {
+bot.onText(/^\/chatid$/, event => {
     if (event.chat.type !== 'private') return
 
     bot.sendPhoto(event.chat.id, 'https://placehold.co/1920x1080.jpg', {
         parse_mode: 'MarkdownV2',
         caption: `✅ Chat Id ของคุณคือ **\`${event.chat.id}\`**`,
     })
+})
+
+bot.on('polling_error', error => {
+    console.error(`Polling error: ${error.message}`)
 })
 
 console.log('Started Thunder Bot')
